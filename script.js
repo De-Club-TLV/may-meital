@@ -55,6 +55,17 @@
             import('https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'),
     });
 
+    // Force the intl-tel-input wrapper to render LTR even though the page is
+    // dir="rtl". The library detects the parent's direction on init and adds
+    // its own iti--rtl class which flips the country selector to the right.
+    // We undo that here so the flag/dial-code sit on the left like JotForm.
+    const itiWrapper = phoneInput.closest('.iti');
+    if (itiWrapper) {
+        itiWrapper.setAttribute('dir', 'ltr');
+        itiWrapper.classList.remove('iti--rtl');
+        itiWrapper.style.direction = 'ltr';
+    }
+
     /* ---------- Validators ---------- */
 
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
