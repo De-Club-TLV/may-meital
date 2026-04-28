@@ -44,31 +44,16 @@
         }
     })();
 
-    /* ---------- intl-tel-input ---------- */
-
-    const iti = window.intlTelInput(phoneInput, {
-        initialCountry: 'il',
-        separateDialCode: true,
-        strictMode: true,
-        formatAsYouType: true,
-        loadUtils: () =>
-            import('https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/utils.js'),
-    });
-
-    // Force the intl-tel-input wrapper to render LTR even though the page is
-    // dir="rtl". The library detects the parent's direction on init and adds
-    // its own iti--rtl class which flips the country selector to the right.
-    // We undo that here so the flag/dial-code sit on the left like JotForm.
-    const itiWrapper = phoneInput.closest('.iti');
-    if (itiWrapper) {
-        itiWrapper.setAttribute('dir', 'ltr');
-        itiWrapper.classList.remove('iti--rtl');
-        itiWrapper.style.direction = 'ltr';
-    }
-
     /* ---------- Validators ---------- */
 
     const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+    // Israeli mobile: 9 digits starting with 5 (after stripping a leading 0).
+    // Accepts user input with hyphens/spaces and an optional leading 0.
+    function normalizeIsraeliMobile(raw) {
+        const digits = raw.replace(/\D/g, '');
+        return digits.startsWith('0') ? digits.slice(1) : digits;
+    }
 
     const validatePhone = (touched = true) => {
         const raw = phoneInput.value.trim();
@@ -76,9 +61,10 @@
             if (touched) showError(phoneField, phoneError, 'נא להזין מספר טלפון.');
             return false;
         }
-        const valid = typeof iti.isValidNumber === 'function' ? iti.isValidNumber() : true;
+        const normalized = normalizeIsraeliMobile(raw);
+        const valid = /^5\d{8}$/.test(normalized);
         if (!valid) {
-            if (touched) showError(phoneField, phoneError, 'נא להזין מספר טלפון תקין.');
+            if (touched) showError(phoneField, phoneError, 'נא להזין מספר נייד ישראלי תקין.');
             return false;
         }
         clearError(phoneField, phoneError);
@@ -115,9 +101,6 @@
 
     phoneInput.addEventListener('blur', () => validatePhone(true));
     phoneInput.addEventListener('input', () => {
-        if (phoneField.classList.contains('invalid')) validatePhone(true);
-    });
-    phoneInput.addEventListener('countrychange', () => {
         if (phoneField.classList.contains('invalid')) validatePhone(true);
     });
 
@@ -177,11 +160,12 @@
         btnLabel.textContent = 'שולח…';
 
         const fd = new FormData(form);
+        const phoneNormalized = normalizeIsraeliMobile((fd.get('phone') || '').toString());
         const payload = {
             first_name: (fd.get('first_name') || '').toString().trim(),
             last_name: (fd.get('last_name') || '').toString().trim(),
-            phone: typeof iti.getNumber === 'function' ? iti.getNumber() : (fd.get('phone') || '').toString(),
-            phone_country: (iti.getSelectedCountryData().iso2 || '').toLowerCase(),
+            phone: `+972${phoneNormalized}`,
+            phone_country: 'il',
             email: (fd.get('email') || '').toString().trim(),
         };
 

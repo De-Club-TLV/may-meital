@@ -8,7 +8,6 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Heebo:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -96,10 +95,16 @@
                     </div>
                 </div>
 
-                <div class="field" data-field="phone" dir="ltr">
-                    <label for="phone" class="label" dir="rtl">טלפון <span class="required">*</span></label>
-                    <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" required>
-                    <p class="field-error" id="phone-error" dir="rtl" hidden>נא להזין מספר טלפון תקין.</p>
+                <div class="field" data-field="phone">
+                    <label for="phone" class="label">טלפון <span class="required">*</span></label>
+                    <div class="phone-row" dir="ltr">
+                        <span class="phone-prefix" aria-hidden="true">
+                            <span class="phone-flag">🇮🇱</span>
+                            <span class="phone-dial">+972</span>
+                        </span>
+                        <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" placeholder="50-234-5678" required>
+                    </div>
+                    <p class="field-error" id="phone-error" hidden>נא להזין מספר נייד ישראלי תקין.</p>
                 </div>
 
                 <div class="field" data-field="email">
@@ -132,7 +137,6 @@
         </footer>
     </main>
 
-    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
     <script src="script.js" defer></script>
 </body>
 </html>
