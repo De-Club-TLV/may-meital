@@ -169,6 +169,22 @@ body {
     font-weight: 300;
 }
 
+.bio-portrait {
+    display: block;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    margin: 0 auto 18px;
+    border: 1px solid var(--color-border-strong);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+}
+
+.block-bio .block-title {
+    text-align: center;
+}
+
 .block-note {
     padding: 20px 22px;
     border: 1px solid var(--color-border);
