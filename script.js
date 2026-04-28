@@ -202,3 +202,45 @@
         }
     });
 })();
+
+/* ---------- Parallax on the yoga photo ---------- */
+// Subtle vertical shift of the image inside its fixed-height window as the
+// element scrolls through the viewport. Pure rAF, no library.
+(() => {
+    const win = document.querySelector('.parallax-window');
+    const img = win?.querySelector('.parallax-img');
+    if (!win || !img) return;
+
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reducedMotion) return;
+
+    // Range of vertical shift in px (each direction). Image is min-height 130%
+    // of the window so we have ~15% of slack on each side to slide through.
+    const RANGE = 60;
+
+    let frameRequested = false;
+    function update() {
+        frameRequested = false;
+        const rect = win.getBoundingClientRect();
+        const viewportH = window.innerHeight || document.documentElement.clientHeight;
+        // progress: 0 when window's top edge is at viewport bottom (entering),
+        //          1 when window's bottom edge is at viewport top (leaving).
+        const total = viewportH + rect.height;
+        const traveled = viewportH - rect.top;
+        const progress = Math.max(0, Math.min(1, traveled / total));
+        // Shift from -RANGE (entering) to +RANGE (leaving), centered at 0.
+        const shift = (progress - 0.5) * 2 * RANGE;
+        img.style.transform = `translate3d(-50%, ${-shift}px, 0)`;
+    }
+
+    function onScrollOrResize() {
+        if (!frameRequested) {
+            frameRequested = true;
+            requestAnimationFrame(update);
+        }
+    }
+
+    window.addEventListener('scroll', onScrollOrResize, { passive: true });
+    window.addEventListener('resize', onScrollOrResize, { passive: true });
+    update();
+})();
