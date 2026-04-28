@@ -7,32 +7,39 @@ This repo holds the **form only** (HTML/CSS/JS). All automation (Trigger.dev tas
 
 ## Stack
 - Plain HTML / CSS / vanilla JS (no framework, no build step)
+- Hebrew RTL (`<html lang="he" dir="rtl">`)
 - Netlify for hosting + deploy
-- Form posts JSON to a Trigger.dev webhook (defined in the General project), then redirects the user to the Arbox purchase page
+- Two Netlify Functions sit between the form and Trigger.dev:
+  - `submit-signup` — HMAC-verifies the form POST and forwards to the `may-meital-signup` Trigger.dev task
+  - `form-status` — returns `{ open: bool }` based on the `FORM_OPEN` env var
+- After successful submit, the browser redirects to the hardcoded Arbox purchase URL
 
 ## Form fields
-- Name
-- Phone
-- Email
+- שם פרטי (first_name)
+- שם משפחה (last_name)
+- טלפון (phone, intl-tel-input, IL default)
+- אימייל (email, required)
 
 ## Submit flow (form side)
-1. POST `{ name, phone, email }` to `TRIGGER_WEBHOOK_URL`
-2. On success, redirect to `ARBOX_PURCHASE_URL`
-3. On failure, show inline error and let the user retry
+1. Validate locally (intl-tel-input + email regex)
+2. HMAC-sign the canonical-JSON payload with `HMAC_SECRET` (shared with the Netlify Function)
+3. POST signed body to `/.netlify/functions/submit-signup`
+4. On success: show "redirecting to payment" panel, then `window.location.href = ARBOX_PURCHASE_URL` after ~800ms
+5. On failure: re-enable button with "נסו שוב" label
 
 ## Capacity (30 paid signups)
-The form calls `FORM_STATUS_URL` on page load. If it returns `{ open: false }`, render the "sold out" state instead of the form. The Trigger.dev side flips this flag once 30 paid signups are confirmed.
+The form calls `/.netlify/functions/form-status` on page load. If it returns `{ open: false }`, render the "sold out" state instead of the form. The General project flips the `FORM_OPEN` env var (via the Netlify API) and triggers a redeploy once 30 paid signups are confirmed. Fail-open: if the status check itself errors, the form stays visible.
 
 ## Cross-project contracts (owned by /General/)
-- **Trigger.dev webhook**: receives the form POST, looks up phone+email in the De Club CRM (Active Members, Membership Leads, Contacts, Expired Contacts; both `+972` and `972` phone formats), creates an item on Monday board `5095357956`:
+- **`may-meital-signup` Trigger.dev task**: receives `{ first_name, last_name, full_name, phone, phone_country, email }` from `submit-signup` Netlify Function. Looks up phone+email in the De Club CRM (Active Members, Membership Leads, Contacts, Expired Contacts; both `+972` and `972` phone formats), creates an item on Monday board `5095357956`:
   - Member match -> Members group
   - Lead match -> Guests group
-  - No match -> create lead-contact-manychat (basic lead generation), assign to event, lead source = `events`, then add to Members/Guests per the new record type
+  - No match -> create lead-contact-manychat (basic lead generation), assign to event, lead source = `events`, then add to Guests
   - Connect item to the Contact via `board_relation_mkycredj`
   - Status = `Pending`
   - Trigger ManyChat WhatsApp template: "your signup will be confirmed only after payment"
-- **Arbox cron** (every 15 min): pulls Arbox sales for SKU `A1`, matches by phone OR email against pending event items, flips matched items to `Approved`, sends a second ManyChat confirmation message
-- **At 30 approved**: flip the form-status flag to `closed`, send Telegram alert to the De Club group
+- **Arbox cron** (every 15 min): pulls Arbox sales for SKU `A1` from `https://arboxserver.arboxapp.com/api/public/v3/reports/{reportName}` (header `api-key: <ARBOX_KEY>`), matches by phone OR email against pending event items, flips matched items to `Approved`, sends a second ManyChat confirmation message
+- **At 30 approved**: flip the Netlify env var `FORM_OPEN` to `false` via the Netlify API, trigger a redeploy, send Telegram alert to the De Club group
 
 ## Commands
 - **Run locally**: `npx serve . -p 4321` then open `http://localhost:4321`

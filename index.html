@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>סדנת תמיכה במגע · מאי מיטל · De Club</title>
+    <link rel="shortcut icon" href="assets/favicon.png" type="image/png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Heebo:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/css/intlTelInput.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="page">
+        <header class="header">
+            <img src="assets/logo-declub.svg" alt="De Club" class="logo">
+        </header>
+
+        <section class="hero">
+            <span class="eyebrow">DE CLUB · סדנה</span>
+            <h1 class="title">תמיכה במגע</h1>
+            <p class="subtitle">סדנה עם מאי מיטל</p>
+            <div class="meta-pills">
+                <span class="meta-pill">
+                    <span class="meta-label">תאריך</span>
+                    <span class="meta-value">09.05.26</span>
+                </span>
+                <span class="meta-pill">
+                    <span class="meta-label">שעות</span>
+                    <span class="meta-value">11:00–13:30</span>
+                </span>
+            </div>
+        </section>
+
+        <section class="content">
+            <article class="block">
+                <h2 class="block-title">קצת על מאי מיטל והאני מאמין שלה</h2>
+                <p>מתרגלת ומלמדת אשטנגה ו-ויניאסה כבר למעלה מעשור, וזה הלב הפועם שבי.</p>
+                <p>עוד מאז ימי כמתעמלת התעמלות אומנותית בגיל 3 ועד היום, הגוף תמיד היה לי לבית האמיתי.</p>
+                <p>חשיבות הארגון הפיזי, האנרגטי והרוחני שלו מלווה אותי עוד הרבה לפני שידעתי לבטא את הצורך הקיומי הזה במילים, והיוגה עבורי היא התשובה המלאה לכך.</p>
+                <p>הקריאה הכי גדולה שלי היא לחלוק ולשתף את הגילויים שלי מהמסע הזה על כל מי שמוצא בהם אור ותשובות.</p>
+            </article>
+
+            <article class="block">
+                <h2 class="block-title">על הסדנה</h2>
+                <p>תמיכה במגע היא שפה עדינה של הקשבה.</p>
+                <p>זהו מגע שאינו מתקן אלא מלווה, אינו דוחף אלא מאפשר.</p>
+                <p>בתוך האסאנות, מגע תומך יוצר תחושת ביטחון, מרחיב את המודעות לגוף ומאפשר למתרגל להרגיש מוחזק/ת מבלי לאבד עצמאות.</p>
+                <p>הוא עוזר לשחרר מאמץ מיותר, לדייק כיוון ותנועה, ולהעמיק את החוויה מבפנים, דרך תחושה ולא דרך מילים.</p>
+                <p>בסדנה נחקור כיצד מגע נכון יכול להעצים את המתרגל, לחזק תחושת ביטחון ויציבות, להיות כלי שמחזק את האמון בגוף, ולסייע בהעמקת האסאנה שלא מתוך תיקון חיצוני אלא מתוך חוויה גופנית פנימית.</p>
+                <p>בסדנה, נלמד איך לקחת את המתרגל יד ביד, מעבר לגבולות המוכרים של העצמי.</p>
+            </article>
+
+            <article class="block">
+                <h2 class="block-title">למי מיועד</h2>
+                <p>מתרגלים ומורים כאחד שרוצים להעמיק ולהעצים את חוויית התמיכה והמגע שלהם.</p>
+            </article>
+
+            <article class="block block-note">
+                <h2 class="block-title">חשוב לציין</h2>
+                <p>הסדנא כולה נעשית בזוגות, כך שניתן להגיע מראש עם בן/בת זוג או שנצוות במקום עם תחילת הסדנא.</p>
+            </article>
+        </section>
+
+        <section class="form-section">
+            <div class="form-intro">
+                <span class="eyebrow">הרשמה</span>
+                <h2 class="form-title">שמרו לעצמכם מקום</h2>
+                <p class="form-subtitle">השלימו את הפרטים, ותועברו לתשלום.</p>
+            </div>
+
+            <form
+                name="may-meital-signup"
+                method="POST"
+                class="signup-form"
+                novalidate
+            >
+                <input type="hidden" name="phone_country" value="">
+                <p class="honeypot" aria-hidden="true">
+                    <label>אל תמלאו: <input name="bot-field"></label>
+                </p>
+
+                <div class="field-row">
+                    <div class="field">
+                        <label for="first_name" class="label">שם פרטי <span class="required">*</span></label>
+                        <input type="text" id="first_name" name="first_name" autocomplete="given-name" required>
+                    </div>
+                    <div class="field">
+                        <label for="last_name" class="label">שם משפחה <span class="required">*</span></label>
+                        <input type="text" id="last_name" name="last_name" autocomplete="family-name" required>
+                    </div>
+                </div>
+
+                <div class="field" data-field="phone">
+                    <label for="phone" class="label">טלפון <span class="required">*</span></label>
+                    <input type="tel" id="phone" name="phone" autocomplete="tel" inputmode="tel" required dir="ltr">
+                    <p class="field-error" id="phone-error" hidden>נא להזין מספר טלפון תקין.</p>
+                </div>
+
+                <div class="field" data-field="email">
+                    <label for="email" class="label">אימייל <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" autocomplete="email" required dir="ltr">
+                    <p class="field-error" id="email-error" hidden>נא להזין כתובת אימייל תקינה.</p>
+                </div>
+
+                <button type="submit" class="submit-btn">
+                    <span class="btn-label">הרשמה והמשך לתשלום</span>
+                </button>
+
+                <p class="form-footnote">ההרשמה תאושר רק לאחר השלמת התשלום. תקבלו אישור בוואטסאפ.</p>
+            </form>
+
+            <div class="redirect-panel" hidden role="status" aria-live="polite">
+                <div class="spinner" aria-hidden="true"></div>
+                <h3 class="redirect-title">מעבירים אתכם לתשלום…</h3>
+                <p class="redirect-subtitle">אם לא הועברתם תוך מספר שניות, <a href="#" id="redirect-link">הקליקו כאן</a>.</p>
+            </div>
+
+            <div class="closed-panel" hidden role="status" aria-live="polite">
+                <h3 class="closed-title">ההרשמה נסגרה</h3>
+                <p class="closed-subtitle">כל המקומות נתפסו. נשמח לראותכם בסדנה הבאה.</p>
+            </div>
+        </section>
+
+        <footer class="footer">
+            <span>© De Club TLV LTD</span>
+        </footer>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@25.3.1/build/js/intlTelInput.min.js"></script>
+    <script src="script.js" defer></script>
+</body>
+</html>
