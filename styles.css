@@ -337,16 +337,29 @@ textarea:focus {
     box-shadow: 0 0 0 3px rgba(232, 165, 153, 0.15);
 }
 
-/* ---------- intl-tel-input dark theme overrides + RTL ---------- */
+/* ---------- intl-tel-input dark theme overrides + force LTR ---------- */
+
+/* Force the entire phone field to LTR so the flag/dial sit on the left.
+   Label and error stay RTL via their own dir="rtl" attribute. */
+.field[data-field="phone"] {
+    direction: ltr;
+}
+
+.field[data-field="phone"] .iti,
+.field[data-field="phone"] .iti * {
+    direction: ltr !important;
+    text-align: left;
+}
 
 .iti {
     width: 100%;
     display: block;
-    direction: ltr;
 }
 
 .iti__tel-input {
     width: 100%;
+    text-align: left !important;
+    direction: ltr !important;
 }
 
 .iti--separate-dial-code .iti__selected-dial-code {
@@ -356,9 +369,12 @@ textarea:focus {
 
 .iti__selected-country-primary {
     background: transparent !important;
-    border-right: 1px solid var(--color-border);
-    border-top-left-radius: var(--radius-md);
-    border-bottom-left-radius: var(--radius-md);
+    border-right: 1px solid var(--color-border) !important;
+    border-left: none !important;
+    border-top-left-radius: var(--radius-md) !important;
+    border-bottom-left-radius: var(--radius-md) !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
     transition: background 0.2s ease;
 }
 
