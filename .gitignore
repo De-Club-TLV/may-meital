@@ -1,0 +1,30 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Node (if we ever add tooling)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build output
+dist/
+build/
+.netlify/
+
+# Logs
+*.log
+
+# Claude Code runtime
+.claude/scheduled_tasks.lock
