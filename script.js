@@ -172,17 +172,44 @@
         try {
             const canonical = canonicalJson(payload);
             const signature = await hmacSha256Hex(HMAC_SECRET, canonical);
-            const response = await fetch(SUBMIT_ENDPOINT, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Webhook-Signature': signature,
-                },
-                body: canonical,
-            });
-            if (!response.ok) {
-                const text = await response.text().catch(() => '');
-                throw new Error('Submission failed: ' + response.status + ' ' + text.slice(0, 200));
+
+            // Retry on transient failures (network drops, 5xx). The function
+            // also retries internally and dedupes via Idempotency-Key, so even
+            // if a previous attempt half-succeeded we will not double-create.
+            const ATTEMPTS = 3;
+            const BACKOFFS_MS = [400, 1200];
+            let response = null;
+            let lastStatus = 0;
+            let lastText = '';
+            for (let i = 0; i < ATTEMPTS; i++) {
+                if (i > 0) await new Promise((r) => setTimeout(r, BACKOFFS_MS[i - 1] || 2000));
+                try {
+                    response = await fetch(SUBMIT_ENDPOINT, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Webhook-Signature': signature,
+                        },
+                        body: canonical,
+                    });
+                    if (response.ok) break;
+                    lastStatus = response.status;
+                    lastText = await response.text().catch(() => '');
+                    // 4xx (except 408) means we sent something wrong, retrying
+                    // won't help — give up immediately.
+                    if (response.status >= 400 && response.status < 500 && response.status !== 408) {
+                        break;
+                    }
+                } catch (e) {
+                    // Network error — fall through and retry
+                    response = null;
+                    lastStatus = 0;
+                    lastText = e && e.message ? e.message : String(e);
+                }
+            }
+
+            if (!response || !response.ok) {
+                throw new Error('Submission failed after retries: ' + lastStatus + ' ' + lastText.slice(0, 200));
             }
 
             // Success: show redirect panel, then send the user to Arbox.
@@ -193,6 +220,9 @@
                 window.location.href = ARBOX_PURCHASE_URL;
             }, 800);
         } catch (err) {
+            // Critical: do NOT redirect to Arbox on failure. We must never let
+            // someone pay without a Pending entry on Monday — the Arbox cron
+            // won't be able to match them and they'd be stuck off-funnel.
             console.error(err);
             btnLabel.textContent = 'נסו שוב';
             submitBtn.disabled = false;
