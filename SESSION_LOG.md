@@ -1,9 +1,41 @@
 # Session Log
 
 ## Spend to date
-- Sessions: 1
-- Tokens (in / out / cache-read): 1,715 / 594,089 / 233,982,577
-- Cost: $459.4264
+- Sessions: 2
+- Tokens (in / out / cache-read): 2,585 / 763,865 / 251,022,615
+- Cost: $531.1691
+
+---
+
+## 2026-04-29
+
+**Focus:** Audit the live pipeline and harden the form so a submission cannot be silently lost between browser, Netlify Function, and Trigger.dev.
+
+**Done:**
+- Audited prod end-to-end. 5 real signups + 3 pre-launch tests reconciled 1:1 against `may-meital-signup` Trigger.dev runs. `may-meital-payment-cron` firing every 15 min, 20+ consecutive successful runs. Netlify deploy ready, `form-status` returns `{open: true}`. Two new live signups arrived mid-audit (Shahar Moniarov, Noy Natanuv).
+- Closed the inbound observability gap: `submit-signup` now Telegram-alerts the **De Club Alerts 🚨** group on every post-HMAC failure (commit `fc10fc4`). Pre-HMAC bot/scanner noise is still ignored.
+- Hardened the pipeline against transient failures (commit `e55ab19`): browser retries the function POST 3x with backoff, function retries Trigger.dev forward 3x with backoff and a 3s per-attempt timeout. Every call now carries an `Idempotency-Key = sha256(phone|email|may-meital-signup)[:32]` so retries collapse to a single Trigger.dev run / single Monday item.
+- Critical browser-side change: on retry exhaustion, do NOT redirect to Arbox. Prevents someone paying with no Pending entry that the cron can't reconcile.
+- Alert payload now embeds first/last name, phone, email, idempotency key as JSON. The alert IS the recovery instrument until automated recovery is built.
+- Set `TELEGRAM_BOT_TOKEN` + `TELEGRAM_ALERT_CHAT_ID` on the `may-meytal` Netlify site via the Netlify MCP (no manual UI work). Re-deployed twice (`f6a7c0c`, `9f6085a`) so the function bundle re-baked with the new vars.
+- Verified end-to-end with a marker-bracketed probe. Function-sent message landed between markers M1 (id 16) and M2 (id 18), confirming alerts fire correctly.
+
+**Decisions:**
+- `envVarIsSecret: true` is broken on this site for our use case. The first `TELEGRAM_BOT_TOKEN` upsert with that flag landed somewhere the function bundle couldn't read it (and didn't show in `getAllEnvVars`). Re-set with `is_secret: false`, matching the existing convention for `MAY_MEITAL_HMAC_SECRET` and `TRIGGER_PROD_SECRET_KEY`.
+- Browser failure path: re-enable button + show "נסו שוב", but never redirect to Arbox. Better UX is a known retry-needed state than a ghost paid sale.
+- Idempotency key derived from phone+email (lowercased). 30-day TTL on Trigger.dev side; covers retries from any layer.
+
+**Bugs / surprises:**
+- A Telegram bot cannot see its own outgoing messages via `getUpdates`. So `/health-check`'s polling, which uses the same bot, will never auto-ticket the alerts the function sends. Yuval sees them visually in the alerts group, but auto-ticketing is broken until we use a separate sender bot.
+
+**Next:**
+- **Fix the alerts-visibility loop.** Recommend creating a dedicated `declub-form-alerts-bot` via @BotFather, adding it to the De Club Alerts group, swapping `TELEGRAM_BOT_TOKEN` on the Netlify site to its token. The existing health-check bot stays as the reader; the new bot is the sender. ~10 min.
+- **Build automated recovery in `/General/`.** Schedule task that polls De Club Alerts for "🚨 May Meital form error" messages, parses embedded payload + idempotency key, re-triggers `may-meital-signup`. With idempotency keys, safe to fire many times. Closes the loop on "lost submission appears on Monday automatically."
+- **Generate `NETLIFY_API_TOKEN`** (https://app.netlify.com/user/applications) and drop into `/General/.env`. Without it, `may-meital-payment-cron`'s auto-close-at-30 logs a warning and stops short of flipping `FORM_OPEN=false`.
+- **Sanity-check on first Pending → Approved** in the wild: confirm flow #2 reaches the user.
+- **Cleanup**: delete the `smoke marker M1`, `smoke marker M2`, and `probe direct (smoke test)` test messages from the De Club Alerts group when convenient.
+
+**Spend:** $71.7427 this session · tokens in/out/cache-read: 870 / 169,776 / 17,040,038
 
 ---
 
